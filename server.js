@@ -20,7 +20,8 @@ mongoose.connect(process.env.MONGO_URI, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
     useCreateIndex: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    connectTimeoutMS: 3000
 })
 
 mongoose.connection.once('connected', () => console.log('Connected to Mongo, Life is Good'));
@@ -32,7 +33,7 @@ app.use('/users', require('./controllers/userController'))
 
 // Routes
 app.get('/', (req, res) => {
-    res.send('<h1>TO The Moooooon</h1>')
+    res.send('<h1>To The Moooooon</h1>')
 });
 
 
