@@ -106,7 +106,7 @@ router.get('/profile', auth, (req, res) => {
 })
 
 // edit the user
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true } )
         res.status(200).json(updatedUser);
@@ -119,7 +119,7 @@ router.put('/:id', auth, async (req, res) => {
 
 
 // Delete user
-router.delete('/:id/',  async (req, res) => {
+router.delete('/:id/', auth,  async (req, res) => {
     try {
         const deletedUserPage = await User.findByIdAndDelete(req.params.id);
         res.status(200).json(deletedUserPage);
