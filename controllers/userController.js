@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Favorited = require('../models/FavoritedPage');
 const { jsonAuth, auth } = require('./authController');
 
-router.get('/', auth, (req, res) => {
+router.get('/', (req, res) => {
     console.log(res.locals)
     const userQuery = User.find({}).select('-password').populate('favoritedPage')
     userQuery.exec((err, foundUsers) => {
@@ -17,8 +17,23 @@ router.get('/', auth, (req, res) => {
     })
 })
 
+
+router.get('/favoritedPages/', async (req, res) => {
+
+    try {
+        const usersFavorited = await Favorited.find({});
+        res.status(200).json(usersFavorited)
+    }catch(error){
+        res.status(400).json({
+            msg: error.message
+        })
+    }
+})
+
+
+
 // Route that add favoritedPage to general API
-router.post('/addFavoritedPage', jsonAuth, (req, res) =>{
+router.post('/addFavoritedPage', auth, (req, res) =>{
     console.log(res.locals, "AddFavoritedPage")
     console.log(req.body)
     const favorited = req.body
@@ -36,16 +51,16 @@ router.post('/addFavoritedPage', jsonAuth, (req, res) =>{
     })
 })
 // Add favoritedPage to a user
-router.post('/addFavoritedPage/:favorited/:username', auth, (req, res) =>{
-    const favoritedPageQuery = Favorited.findOne({ name: req.params.favorited })
+router.post('/addFavoritedPage/:favorited/:username',  (req, res) =>{
+    const favoritedPageQuery = Favorited.findOne({ _id: req.params.favorited })
     favoritedPageQuery.exec(( err, favorited ) => {
         if(err){
             res.status(400).json({
                 msg: err.message
             })
         } else {
-            const addBookmarkQuery = User.findOneAndUpdate({ username: req.params.username }, { $addToSet: { favoritedPage: favorited._id }}, {new: true})
-            addBookmarkQuery.exec((err, updatedUser) => {
+            const addFavoritedQuery = User.findOneAndUpdate({ username: req.params.username }, { $addToSet: { favoritedPage: favorited._id }}, {new: true})
+            addFavoritedQuery.exec((err, updatedUser) => {
                 if(err){
                     res.status(400).json({
                         msg: err.message
@@ -62,8 +77,8 @@ router.post('/addFavoritedPage/:favorited/:username', auth, (req, res) =>{
 })
 
 
-//Route that shows all favorited Pages for a specific user
-router.get('/:username', auth, (req, res) => {
+//Route that shows all favorited Pages for a specific user and user info
+router.get('/:username',  (req, res) => {
     const userQuery = User.findOne({ username: req.params.username.toLowerCase() }).select('-password').populate('favoritedPage')
     userQuery.exec((err, foundUser) => {
         if (err) {
@@ -74,6 +89,33 @@ router.get('/:username', auth, (req, res) => {
             res.status(200).json(foundUser)
         }
     })
+})
+
+
+router.get('/profile', auth, (req, res) => {
+    const userQuery = User.findOne({ username: req.params.username.toLowerCase() }).select('-password').populate('favoritedPage')
+    userQuery.exec((err, foundUser) => {
+        if (err) {
+           res.status(400).json({
+               msg: err.message
+           }) 
+        } else {
+            res.status(200).json(foundUser)
+        }
+    })
+})
+
+
+// Delete user
+router.delete('/:id/', auth,  async (req, res) => {
+    try {
+        const deletedUserPage = await User.findByIdAndDelete(req.params.id);
+        res.status(200).json(deletedUserPage);
+    } catch (error) {
+        res.status(400).json({
+            msg: error.message
+        })
+    }
 })
 
 
