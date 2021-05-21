@@ -119,7 +119,7 @@ router.put('/:id', auth, async (req, res) => {
 
 
 // Delete user
-router.delete('/:id/', auth,  async (req, res) => {
+router.delete('/:id/',  async (req, res) => {
     try {
         const deletedUserPage = await User.findByIdAndDelete(req.params.id);
         res.status(200).json(deletedUserPage);
